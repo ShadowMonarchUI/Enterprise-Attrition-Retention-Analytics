@@ -13,40 +13,40 @@ import sqlite3
 # Set the page layout to wide
 st.set_page_config(page_title="Customer Churn Dashboard", layout="wide", initial_sidebar_state="expanded")
 
-# --- Custom CSS for Premium Power BI Layout ---
+# --- Custom CSS for Dynamic Light/Dark Mode ---
 st.markdown("""
 <style>
-    /* Professional slate-gray background for the entire app */
+    /* Use Streamlit's dynamic theme variables instead of hardcoded hex colors */
     .stApp {
-        background-color: #F0F4F8;
+        background-color: var(--secondary-background-color);
     }
     
-    /* Crisp white background, fine border, and shadow for KPI metric cards */
+    /* Dynamic background, border, and shadow for KPI metric cards */
     div[data-testid="metric-container"] {
-        background-color: #FFFFFF;
-        border: 1px solid #E2E8F0;
+        background-color: var(--background-color);
+        border: 1px solid rgba(128, 128, 128, 0.2);
         padding: 15px;
         border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
-    /* Crisp white background, fine border, and shadow for all Plotly charts */
+    /* Dynamic background for Plotly charts */
     div.stPlotlyChart {
-        background-color: #FFFFFF;
-        border: 1px solid #E2E8F0;
+        background-color: var(--background-color);
+        border: 1px solid rgba(128, 128, 128, 0.2);
         border-radius: 8px;
         padding: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     /* Styling for the floating Insight Cards */
     .insight-card {
-        background-color: #FFFFFF;
-        border: 1px solid #E2E8F0;
+        background-color: var(--background-color);
+        border: 1px solid rgba(128, 128, 128, 0.2);
         border-left: 5px solid #118DFF; /* Power BI Blue Accent */
         border-radius: 8px;
         padding: 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         height: 100%;
         font-size: 15px;
     }
@@ -65,18 +65,16 @@ st.markdown("""
 # Power BI Color Palette
 PBI_COLORS = {'Churned': '#E66C37', 'Retained': '#118DFF'}
 
-# Helper function to apply Power BI styling to all charts
+# Helper function: Removed "plotly_white" so Streamlit can auto-invert colors in Dark Mode
 def apply_pbi_theme(fig):
     fig.update_layout(
-        template="plotly_white",
         margin=dict(t=40, b=20, l=10, r=10),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        title_font=dict(size=16, family="Segoe UI, Arial, sans-serif", color="#252423"),
         legend_title_text=''
     )
-    fig.update_xaxes(showgrid=False, linecolor='#EBEBEB')
-    fig.update_yaxes(gridcolor='#EBEBEB', zerolinecolor='#EBEBEB')
+    fig.update_xaxes(showgrid=False)
+    fig.update_yaxes(gridcolor='rgba(128, 128, 128, 0.2)', zerolinecolor='rgba(128, 128, 128, 0.2)')
     return fig
 
 # Cache the data extraction
@@ -200,7 +198,6 @@ with row2_col1:
     st.plotly_chart(fig_donut, use_container_width=True)
 
 with row2_col2:
-    # Power BI Style 100% Stacked Bar for Proportional Analysis
     fig_bar_stack = px.histogram(
         filtered_df, x="Tenure_Group", color="Churn_Label", barmode="relative", barnorm="percent",
         title="<b>Attrition Proportion by Lifecycle Stage (%)</b>",
@@ -238,7 +235,6 @@ with row3_col2:
 row4_col1, row4_col2 = st.columns(2)
 
 with row4_col1:
-    # Bar Chart for Gender Proportions
     fig_gender = px.histogram(
         filtered_df, x="Gender", color="Churn_Label", barmode="group",
         title="<b>Attrition Volume by Demographic (Gender)</b>",
@@ -249,7 +245,6 @@ with row4_col1:
     st.plotly_chart(fig_gender, use_container_width=True)
 
 with row4_col2:
-    # Violin Plot for Age Distribution (High-end BI Visual)
     fig_violin = px.violin(
         filtered_df, x="Churn_Label", y="Age", color="Churn_Label", box=True,
         title="<b>Age Distribution Density by Status</b>",
